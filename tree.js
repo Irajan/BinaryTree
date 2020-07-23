@@ -74,4 +74,42 @@ export default class Tree {
 
     return { inorder: iN, preorder: pre, postorder: post };
   }
+
+  draw(x, y, canvas, currentNode = this.root, dx = 100, dy = 80) {
+    if (currentNode == null) return;
+    var r = 15;
+    var cc = canvas.getContext("2d");
+
+    //Fill the x and y position with the node value
+    cc.fillText(currentNode.value, x, y);
+
+    //If left node exists draw line towards left
+    cc.beginPath();
+    cc.moveTo(x, y + r);
+    currentNode.LEFT == null
+      ? cc.lineTo(x, y + r)
+      : cc.lineTo(x - dx, y + dy - r);
+    cc.stroke();
+
+    //If right node exists draw line towards right
+    cc.beginPath();
+    cc.moveTo(x, y + r);
+    currentNode.RIGHT == null
+      ? cc.lineTo(x, y + r)
+      : cc.lineTo(x + dx, y + dy - r);
+    cc.stroke();
+
+    //Draw the circle with the x and y center
+    cc.beginPath();
+    cc.arc(x, y, r, Math.PI * 2, false);
+    cc.closePath();
+    cc.stroke();
+
+    //Recursevely change x and y value wiht respect to dx and dy
+    //dx and dy are the variables to separate left and right node
+    //dx and dy are also reduced as distance between node goes decreasing
+    //as we dive deep inside tree
+    this.draw(x - dx, y + dy, canvas, currentNode.LEFT, (1 / 2) * dx, dy - 2);
+    this.draw(x + dx, y + dy, canvas, currentNode.RIGHT, (1 / 2) * dx, dy - 2);
+  }
 }
