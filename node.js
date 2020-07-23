@@ -3,6 +3,7 @@ export default class Node {
     this.LEFT = null;
     this.RIGHT = null;
     this.PARENT = null;
+    this.depth = 0;
     this.value = value;
     Node.number = ++Node.number || 1;
   }
@@ -19,11 +20,13 @@ export default class Node {
   addLeft(newNode) {
     newNode.PARENT = this;
     this.LEFT = newNode;
+    newNode.depth = this.depth + 1;
   }
 
   addRight(newNode) {
     newNode.PARENT = this;
     this.RIGHT = newNode;
+    newNode.depth = this.depth + 1;
   }
 
   isLeaf() {
