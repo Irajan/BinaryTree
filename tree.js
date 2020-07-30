@@ -25,6 +25,14 @@ export default class Tree {
     return;
   }
 
+  search(key, currentNode = this.root) {
+    if (currentNode == null) return new Error(`Key ${key} not found`);
+    else if (key < currentNode.value) return this.search(key, currentNode.LEFT);
+    else if (key > currentNode.value)
+      return this.search(key, currentNode.RIGHT);
+    else return currentNode;
+  }
+
   remove(value, currentNode = this.root) {
     if (currentNode == null) console.log("Key not found");
     else if (value < currentNode.value) this.remove(value, currentNode.LEFT);
@@ -54,13 +62,13 @@ export default class Tree {
     }
   }
 
-  traverse() {
+  traverse(node = this.root) {
     // initilize arrays for different traversal
     const iN = new Array(); //for in order traversal
     const pre = new Array(); //for pre order traversal
     const post = new Array(); //for post order traversal
 
-    innerTravel(this.root); //inner function for performing recursive traversal
+    innerTravel(node); //inner function for performing recursive traversal
 
     function innerTravel(currentNode) {
       if (currentNode == null) return;
@@ -75,13 +83,13 @@ export default class Tree {
     return { inorder: iN, preorder: pre, postorder: post };
   }
 
-  draw(x, y, canvas, currentNode = this.root, dx = 100, dy = 80) {
+  draw(x, y, canvas, currentNode = this.root, dx = 40, dy = 50) {
     if (currentNode == null) return;
     var r = 15;
     var cc = canvas.getContext("2d");
 
     //Fill the x and y position with the node value
-    cc.fillText(currentNode.value, x, y);
+    cc.fillText(currentNode.value, x - r / 2, y);
 
     //If left node exists draw line towards left
     cc.beginPath();
