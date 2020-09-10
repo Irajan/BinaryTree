@@ -9,8 +9,9 @@ export default function avlBalancedTree(values, canvas) {
     tree.insert(values[i]);
     const node = checkRotation(tree.root);
 
+    tree.draw(canvas.width / 2, 50 + i * 200, canvas);
+
     if (node.rotationRequired == true) {
-      tree.draw(canvas.width / 2, 200 + 150 * i, canvas);
       delete node.rotationRequired;
       avlRotate(node);
     }
@@ -77,14 +78,10 @@ function avlRotate(node) {
   if (node.rightMaxBranch != undefined) {
     if (node.rightMaxBranch[0] == "LEFT") rotateRight(node.RIGHT);
     rotateLeft(node);
-
-    console.log(node.rightMaxBranch);
     delete node.rightMaxBranch;
   } else {
     if (node.leftMaxBranch[0] == "RIGHT") rotateLeft(node.LEFT);
     rotateRight(node);
-
-    console.log(node.leftMaxBranch);
     delete node.leftMaxBranch;
   }
 
@@ -93,50 +90,54 @@ function avlRotate(node) {
 
   updateDepth(tree.root.LEFT);
   updateDepth(tree.root.RIGHT);
+
+  const checkNode = checkRotation(tree.root);
+
+  if (checkNode.rotationRequired == true) {
+    delete checkNode.rotationRequired;
+    avlRotate(checkNode);
+  }
 }
 
 function rotateLeft(node) {
+  const right = node.RIGHT.LEFT;
+
   if (node.PARENT == null) {
     tree.root = node.RIGHT;
     node.PARENT = node.RIGHT;
     node.PARENT.LEFT = node;
-
-    node.RIGHT = null;
   } else {
     const parent = node.PARENT;
     const side = node.getSide();
 
     node.PARENT = node.RIGHT;
-    node.LEFT = null;
-    node.RIGHT = null;
 
     node.PARENT.PARENT = parent;
     node.PARENT.LEFT = node;
 
     parent[side] = node.PARENT;
   }
+  node.RIGHT = right;
 }
 
 function rotateRight(node) {
+  const left = node.LEFT.RIGHT;
   if (node.PARENT == null) {
     tree.root = node.LEFT;
     node.PARENT = node.LEFT;
     node.PARENT.RIGHT = node;
-
-    node.LEFT = null;
   } else {
     const parent = node.PARENT;
     const side = node.getSide();
 
     node.PARENT = node.LEFT;
-    node.LEFT = null;
-    node.RIGHT = null;
 
     node.PARENT.RIGHT = node;
     node.PARENT.PARENT = parent;
 
     parent[side] = node.PARENT;
   }
+  node.LEFT = left;
 }
 
 function updateDepth(node) {
