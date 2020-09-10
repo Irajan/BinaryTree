@@ -7,87 +7,142 @@ export default function avlBalancedTree(values, canvas) {
   }
   for (let i = 0; i < values.length; i++) {
     tree.insert(values[i]);
+    const node = checkRotation(tree.root);
 
-    const { status, check, node } = checkRotation(tree.root);
-
-    if (status == true) {
-      avlRotate(node, check);
-      tree.draw((i - 2) * 150 + 100, canvas.height / 2, canvas);
+    if (node.rotationRequired == true) {
+      tree.draw(canvas.width / 2, 200 + 150 * i, canvas);
+      delete node.rotationRequired;
+      avlRotate(node);
     }
   }
-
   return tree;
 }
 
 //Function to check if node is balanced or not
 function checkRotation(node) {
-  if (node == null) return { status: false };
+  if (node == null) return { rotationRequired: false };
+  const leftMaxBranch = getMaxBranch(node.LEFT);
+  const rightMaxBranch = getMaxBranch(node.RIGHT);
 
-  const check = getMaxBranch(node.LEFT) - getMaxBranch(node.RIGHT);
-  if (Math.abs(check) >= 2) return { status: true, check, node };
-  else {
+  const difference =
+    (node.LEFT != null ? leftMaxBranch.length + 1 : 0) -
+    (node.RIGHT != null ? rightMaxBranch.length + 1 : 0);
+
+  if (difference == 2) {
+    node.rotationRequired = true;
+    node.leftMaxBranch = leftMaxBranch;
+    return node;
+  } else if (difference == -2) {
+    node.rotationRequired = true;
+    node.rightMaxBranch = rightMaxBranch;
+    return node;
+  } else {
     let statusNode = checkRotation(node.LEFT);
 
-    if (statusNode.status == true) return statusNode;
+    if (statusNode.rotationRequired == true) return statusNode;
 
     statusNode = checkRotation(node.RIGHT);
-    if (statusNode.status == true) return statusNode;
+    if (statusNode.rotationRequired == true) return statusNode;
 
-    return { status: false };
+    return { rotationRequired: false };
   }
 }
 
 //Function to check the maximum branch upto leaf from given node
 function getMaxBranch(node) {
   const { preorder } = tree.traverse(node);
-  if (preorder.length == 0) return 0;
+  const maxPath = new Array();
+  let maxLeaf = node; //Track leaf with max depth
+  if (preorder.length == 0) return maxPath;
 
-  let max = 0;
   for (let key of preorder) {
     const result = tree.search(key, node);
-    if (result.isLeaf()) max = max < result.depth ? result.depth : max;
+    if (result.isLeaf()) {
+      maxLeaf = maxLeaf.depth < result.depth ? result : maxLeaf;
+    }
   }
-  return max;
+
+  let currentNode = maxLeaf;
+
+  while (currentNode.value != node.value) {
+    maxPath.push(currentNode.getSide());
+    currentNode = currentNode.PARENT;
+  }
+  return maxPath.reverse();
 }
 
 //Fucntion to perform rotation
 
-function avlRotate(node, check) {
-  if (check < 0) {
+function avlRotate(node) {
+  if (node.rightMaxBranch != undefined) {
+    if (node.rightMaxBranch[0] == "LEFT") rotateRight(node.RIGHT);
     rotateLeft(node);
+
+    console.log(node.rightMaxBranch);
+    delete node.rightMaxBranch;
   } else {
+    if (node.leftMaxBranch[0] == "RIGHT") rotateLeft(node.LEFT);
     rotateRight(node);
+
+    console.log(node.leftMaxBranch);
+    delete node.leftMaxBranch;
   }
+
+  tree.root.depth = 0;
+  tree.root.PARENT = null;
+
+  updateDepth(tree.root.LEFT);
+  updateDepth(tree.root.RIGHT);
 }
 
 function rotateLeft(node) {
-  console.log("Rotate Left");
+  if (node.PARENT == null) {
+    tree.root = node.RIGHT;
+    node.PARENT = node.RIGHT;
+    node.PARENT.LEFT = node;
+
+    node.RIGHT = null;
+  } else {
+    const parent = node.PARENT;
+    const side = node.getSide();
+
+    node.PARENT = node.RIGHT;
+    node.LEFT = null;
+    node.RIGHT = null;
+
+    node.PARENT.PARENT = parent;
+    node.PARENT.LEFT = node;
+
+    parent[side] = node.PARENT;
+  }
 }
 
 function rotateRight(node) {
-  const x = node;
-  const y = node.LEFT;
+  if (node.PARENT == null) {
+    tree.root = node.LEFT;
+    node.PARENT = node.LEFT;
+    node.PARENT.RIGHT = node;
 
-  y.PARENT = x.PARENT;
+    node.LEFT = null;
+  } else {
+    const parent = node.PARENT;
+    const side = node.getSide();
 
-  if (y.PARENT == null) tree.root = y;
-  else y.PARENT[x.getSide()] = y;
+    node.PARENT = node.LEFT;
+    node.LEFT = null;
+    node.RIGHT = null;
 
-  x.PARENT = y;
-  x.LEFT = y.RIGHT;
-  y.RIGHT = x;
+    node.PARENT.RIGHT = node;
+    node.PARENT.PARENT = parent;
 
-  y.depth -= 1;
-
-  updateDepth(y.LEFT);
-  updateDepth(y.RIGHT);
+    parent[side] = node.PARENT;
+  }
 }
 
-//Function to update depth of tree from the given node
 function updateDepth(node) {
   if (node == null) return;
-
   node.depth = node.PARENT.depth + 1;
-  updateDepth(node.LEFT);
+
   updateDepth(node.RIGHT);
+  updateDepth(node.LEFT);
 }
