@@ -22,7 +22,7 @@ export default class Tree {
         ? this.insert(value, currentNode.RIGHT) //Recursively check right sub tree
         : currentNode.addRight(value); //If currentNode don't have right node insert newNode
 
-    return;
+    return value;
   }
 
   search(key, currentNode = this.root) {
