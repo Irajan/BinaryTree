@@ -83,7 +83,7 @@ export default class Tree {
     return { inorder: iN, preorder: pre, postorder: post };
   }
 
-  draw(x, y, canvas, currentNode = this.root, dx = 40, dy = 50) {
+  draw(x, y, canvas, dx = 40, dy = 50, currentNode = this.root) {
     if (currentNode == null) return;
     var r = 15;
     var cc = canvas.getContext("2d");
