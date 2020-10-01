@@ -117,7 +117,7 @@ export default class Tree {
     //dx and dy are the variables to separate left and right node
     //dx and dy are also reduced as distance between node goes decreasing
     //as we dive deep inside tree
-    this.draw(x - dx, y + dy, canvas, currentNode.LEFT, (1 / 2) * dx, dy - 2);
-    this.draw(x + dx, y + dy, canvas, currentNode.RIGHT, (1 / 2) * dx, dy - 2);
+    this.draw(x - dx, y + dy, canvas, (1 / 2) * dx, dy - 2, currentNode.LEFT);
+    this.draw(x + dx, y + dy, canvas, (1 / 2) * dx, dy - 2, currentNode.RIGHT);
   }
 }
