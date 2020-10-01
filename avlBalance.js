@@ -1,22 +1,23 @@
 import Tree from "./tree.js";
 const tree = new Tree();
-export default function avlBalancedTree(values, canvas) {
+export default function avlBalancedTree(values) {
+  let rotated = false;
   if (values instanceof Tree) {
     const { preorder } = values.traverse();
     values = preorder;
   }
-  for (let i = 0; i < values.length; i++) {
-    tree.insert(values[i]);
-    const node = checkRotation(tree.root);
 
-    tree.draw(canvas.width / 2, 50 + i * 200, canvas);
+  for (let i = 0; i < values.length; i++) {
+    const checkNode = tree.insert(values[i]);
+    const node = checkRotation(checkNode);
 
     if (node.rotationRequired == true) {
-      delete node.rotationRequired;
+      rotated = true;
       avlRotate(node);
     }
+    delete node.rotationRequired;
   }
-  return tree;
+  return { balancedTree: tree, rotated };
 }
 
 //Function to check if node is balanced or not
@@ -38,11 +39,8 @@ function checkRotation(node) {
     node.rightMaxBranch = rightMaxBranch;
     return node;
   } else {
-    let statusNode = checkRotation(node.LEFT);
+    let statusNode = checkRotation(node.PARENT);
 
-    if (statusNode.rotationRequired == true) return statusNode;
-
-    statusNode = checkRotation(node.RIGHT);
     if (statusNode.rotationRequired == true) return statusNode;
 
     return { rotationRequired: false };

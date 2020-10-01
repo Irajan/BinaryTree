@@ -1,14 +1,44 @@
 import { _ } from "./library.js";
 import Tree from "./tree.js";
 import avlBalance from "./avlBalance.js";
-const canvas = _("canvas");
+const canvas = _("canvas"),
+  input = _("input"),
+  tree = new Tree();
 
-canvas.width = window.innerWidth - 20;
-canvas.height = window.innerHeight - 20;
+canvas.width = window.innerWidth - 50;
+canvas.height = window.innerHeight - 100;
 
-const tree = new Tree();
-const values = [10, 9, 8, 5, 20, 15, 25, 21, 22];
+const takeInput = function (e) {
+  e.preventDefault();
+  input.disabled = false;
+  input.focus();
+};
 
-for (let value of values) tree.insert(value);
-tree.draw(canvas.width / 2, 20, canvas);
-avlBalance(tree, canvas);
+window.addEventListener("contextmenu", takeInput);
+window.addEventListener("keydown", function (e) {
+  if (e.key == "Enter") {
+    tree.insert(+input.value);
+
+    canvas.getContext("2d").clearRect(0, 0, canvas.width, canvas.height);
+    tree.draw(canvas.width / 3, canvas.height / 5, canvas, 80, 100);
+    const { balancedTree, rotated } = avlBalance(tree);
+    balancedTree.draw(
+      (2 * canvas.width) / 3,
+      canvas.height / 5,
+      canvas,
+      80,
+      100
+    );
+
+    if (rotated) {
+      const { preorder } = balancedTree.traverse();
+      tree.root = null;
+
+      for (let i = 0; i < preorder.length; i++) tree.insert(preorder[i]);
+    }
+    input.value = null;
+  }
+});
+window.addEventListener("dblclick", function () {
+  input.disabled = true;
+});
